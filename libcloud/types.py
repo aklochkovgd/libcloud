@@ -71,12 +71,14 @@ class NodeState(object):
     @cvar TERMINATED: Node is terminated
     @cvar PENDING: Node is pending
     @cvar UNKNOWN: Node state is unknown
+    @cvar ERROR: Node state is error
     """
     RUNNING = 0
     REBOOTING = 1
     TERMINATED = 2
     PENDING = 3
     UNKNOWN = 4
+    ERROR = 5
 
 class LibcloudError(Exception):
     """The base class for other libcloud exceptions"""
