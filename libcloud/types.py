@@ -77,6 +77,7 @@ class NodeState(object):
     TERMINATED = 2
     PENDING = 3
     UNKNOWN = 4
+    ERROR = 5
 
 class LibcloudError(Exception):
     """The base class for other libcloud exceptions"""

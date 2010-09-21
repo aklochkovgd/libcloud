@@ -176,6 +176,7 @@ class RackspaceNodeDriver(NodeDriver):
     NODE_STATE_MAP = { 'BUILD': NodeState.PENDING,
                        'REBUILD': NodeState.PENDING,
                        'ACTIVE': NodeState.RUNNING,
+                       'ERROR': NodeState.ERROR,
                        'SUSPENDED': NodeState.TERMINATED,
                        'QUEUE_RESIZE': NodeState.PENDING,
                        'PREP_RESIZE': NodeState.PENDING,
