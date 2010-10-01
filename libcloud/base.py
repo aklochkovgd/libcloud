@@ -307,8 +307,8 @@ class ConnectionKey(object):
     """
     A Base Connection class to derive from.
     """
-    #conn_classes = (httplib.LoggingHTTPConnection, LoggingHTTPSConnection)
-    conn_classes = (httplib.HTTPConnection, httplib.HTTPSConnection)
+    conn_classes = (httplib.LoggingHTTPConnection, LoggingHTTPSConnection)
+    #conn_classes = (httplib.HTTPConnection, httplib.HTTPSConnection)
 
     responseCls = Response
     connection = None
