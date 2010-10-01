@@ -71,6 +71,7 @@ class NodeState(object):
     @cvar TERMINATED: Node is terminated
     @cvar PENDING: Node is pending
     @cvar UNKNOWN: Node state is unknown
+    @cvar ERROR: Node state is error
     """
     RUNNING = 0
     REBOOTING = 1
