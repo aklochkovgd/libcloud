@@ -18,6 +18,7 @@ Provides base classes for working with drivers
 """
 import httplib, urllib
 import libcloud
+import logging
 from libcloud.types import NodeState, DeploymentError
 from libcloud.ssh import SSHClient
 import time
@@ -27,6 +28,9 @@ import os
 import socket
 import struct
 from pipes import quote as pquote
+
+
+logger = logging.getLogger(__name__)
 
 
 class Node(object):
@@ -202,10 +206,7 @@ class LoggingConnection():
     """
     Debug class to log all HTTP(s) requests as they could be made
     with the C{curl} command.
-
-    @cvar log: file-like object that logs entries are written to.
     """
-    log = None
 
     def _log_response(self, r):
         rv = "# -------- begin %d:%d response ----------\n" % (id(self), id(r))
@@ -264,19 +265,17 @@ class LoggingHTTPSConnection(LoggingConnection, httplib.HTTPSConnection):
 
     def getresponse(self):
         r = httplib.HTTPSConnection.getresponse(self)
-        if self.log is not None:
+        if logger.isEnabledFor(logging.DEBUG):
             r, rv = self._log_response(r)
-            self.log.write(rv + "\n")
-            self.log.flush()
+            logger.debug(rv)
         return r
 
     def request(self, method, url, body=None, headers=None):
         headers.update({'X-LC-Request-ID': str(id(self))})
-        if self.log is not None:
-            pre = "# -------- begin %d request ----------\n"  % id(self)
-            self.log.write(pre +
-                           self._log_curl(method, url, body, headers) + "\n")
-            self.log.flush()
+        if logger.isEnabledFor(logging.DEBUG):
+            pre = "# -------- begin %d request ----------"  % id(self)
+            logger.debug(pre +
+                           self._log_curl(method, url, body, headers))
         return httplib.HTTPSConnection.request(self, method, url,
                                                body, headers)
 
@@ -287,19 +286,17 @@ class LoggingHTTPConnection(LoggingConnection, httplib.HTTPConnection):
 
     def getresponse(self):
         r = httplib.HTTPConnection.getresponse(self)
-        if self.log is not None:
+        if logger.isEnabledFor(logging.DEBUG):
             r, rv = self._log_response(r)
-            self.log.write(rv + "\n")
-            self.log.flush()
+            logger.debug(rv)
         return r
 
     def request(self, method, url, body=None, headers=None):
-        headers.update({'X-LC-Request-ID': str(id(self))})
-        if self.log is not None:
-            pre = "# -------- begin %d request ----------\n"  % id(self)
-            self.log.write(pre +
-                           self._log_curl(method, url, body, headers) + "\n")
-            self.log.flush()
+        #headers.update({'X-LC-Request-ID': str(id(self))})
+        if logger.isEnabledFor(logging.DEBUG):
+            pre = "# -------- begin %d request ----------"  % id(self)
+            logger.debug(pre +
+                           self._log_curl(method, url, body, headers))
         return httplib.HTTPConnection.request(self, method, url,
                                                body, headers)
 
@@ -315,8 +312,8 @@ class ConnectionKey(object):
     # with upstream Python (see http://bugs.python.org/issue1589 for details)
     # and not with libcloud.
 
-    #conn_classes = (httplib.LoggingHTTPConnection, LoggingHTTPSConnection)
-    conn_classes = (httplib.HTTPConnection, httplib.HTTPSConnection)
+    conn_classes = (LoggingHTTPConnection, LoggingHTTPSConnection)
+    #conn_classes = (httplib.HTTPConnection, httplib.HTTPSConnection)
 
     responseCls = Response
     connection = None
