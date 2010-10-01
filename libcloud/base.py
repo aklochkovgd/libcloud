@@ -292,7 +292,7 @@ class LoggingHTTPConnection(LoggingConnection, httplib.HTTPConnection):
         return r
 
     def request(self, method, url, body=None, headers=None):
-        headers.update({'X-LC-Request-ID': str(id(self))})
+        #headers.update({'X-LC-Request-ID': str(id(self))})
         if logger.isEnabledFor(logging.DEBUG):
             pre = "# -------- begin %d request ----------"  % id(self)
             logger.debug(pre +
