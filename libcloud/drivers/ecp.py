@@ -176,7 +176,7 @@ class ECPNodeDriver(NodeDriver):
 
         return n
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         """
         Shuts down a VM and then starts it again.
         """

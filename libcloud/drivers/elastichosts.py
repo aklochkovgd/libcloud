@@ -236,7 +236,7 @@ class ElasticHostsBaseNodeDriver(NodeDriver):
     name = 'ElasticHosts'
     connectionCls = ElasticHostsBaseConnection
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         # Reboots the node
         response = self.connection.request(action = '/servers/%s/reset' % (node.id),
                                            method = 'POST')

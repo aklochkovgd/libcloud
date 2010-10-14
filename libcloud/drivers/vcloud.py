@@ -394,7 +394,7 @@ class VCloudNodeDriver(NodeDriver):
         res = self.connection.request(node_path, method='DELETE')
         return res.status == 202
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         res = self.connection.request('%s/power/action/reset'
                                       % get_url_path(node.id),
                                       method='POST')

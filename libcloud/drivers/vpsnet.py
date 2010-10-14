@@ -157,7 +157,7 @@ class VPSNetNodeDriver(NodeDriver):
         node = self._to_node(res.object['virtual_machine'])
         return node
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         res = self.connection.request('/virtual_machines/%s/%s.%s' %
                                         (node.id, 'reboot', API_VERSION),
                                         method="POST")

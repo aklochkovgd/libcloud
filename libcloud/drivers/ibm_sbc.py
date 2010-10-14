@@ -125,7 +125,7 @@ class IBMNodeDriver(NodeDriver):
         status = int(self.connection.request(action = url, method='DELETE').status)
         return status == 200
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         url = REST_BASE + '/instances/%s' % (node.id)
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         data = {'state': 'restart'}

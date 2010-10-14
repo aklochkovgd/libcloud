@@ -58,11 +58,11 @@ class Node(object):
         """
         return hashlib.sha1("%s:%d" % (self.id,self.driver.type)).hexdigest()
 
-    def reboot(self):
+    def reboot(self, hard=False):
         """Reboot this node
         @return: C{bool}
         """
-        return self.driver.reboot_node(self)
+        return self.driver.reboot_node(self, hard)
 
     def destroy(self):
         """Destroy this node
@@ -580,7 +580,7 @@ class NodeDriver(object):
         raise NotImplementedError, \
             'destroy_node not implemented for this driver'
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         """
         Reboot a node.
         @return: C{bool} True if the reboot was successful, otherwise False

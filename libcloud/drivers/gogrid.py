@@ -205,7 +205,7 @@ class GoGridNodeDriver(NodeDriver):
                  for el
                  in res['list'] ]
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         id = node.id
         power = 'restart'
         res = self._server_power(id, power)

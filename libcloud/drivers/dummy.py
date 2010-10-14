@@ -86,7 +86,7 @@ class DummyNodeDriver(NodeDriver):
     def list_nodes(self):
         return self.nl
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         node.state = NodeState.REBOOTING
         return True
 
