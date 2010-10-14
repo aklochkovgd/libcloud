@@ -181,7 +181,7 @@ class VoxelNodeDriver(NodeDriver):
         else:
             return None
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         """
         Reboot the node by passing in the node object
         """

@@ -232,7 +232,7 @@ class LinodeNodeDriver(NodeDriver):
         data = self.connection.request(LINODE_ROOT, params=params).objects[0]
         return self._to_nodes(data)
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         """Reboot the given Linode
 
         Will issue a shutdown job followed by a boot job, using the last booted

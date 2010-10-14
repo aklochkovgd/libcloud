@@ -431,7 +431,7 @@ class SoftLayerNodeDriver(NodeDriver):
         nodes = self._to_nodes(res)
         return nodes
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         res = self.connection.request(
             "SoftLayer_Virtual_Guest",
             "rebootHard",

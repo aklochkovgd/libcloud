@@ -118,7 +118,7 @@ class OpenNebulaNodeDriver(NodeDriver):
     def list_locations(self):
         return [NodeLocation(0,  'OpenNebula', 'ONE', self)]
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         compute_id = str(node.id)
 
         url = '/compute/%s' % compute_id

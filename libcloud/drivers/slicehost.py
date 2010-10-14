@@ -127,7 +127,7 @@ class SlicehostNodeDriver(NodeDriver):
         )[0]
         return node
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         """Reboot the node by passing in the node object"""
 
         # 'hard' could bubble up as kwarg depending on how reboot_node

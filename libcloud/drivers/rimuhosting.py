@@ -186,7 +186,7 @@ class RimuHostingNodeDriver(NodeDriver):
         res = self.connection.request('/distributions').object
         return map(lambda x : self._to_image(x), res['distro_infos'])
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         # Reboot
         # PUT the state of RESTARTING to restart a VPS.
         # All data is encoded as JSON

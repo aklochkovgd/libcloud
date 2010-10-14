@@ -175,7 +175,7 @@ class DreamhostNodeDriver(NodeDriver):
         except DreamhostAPIException:
             return False
 
-    def reboot_node(self, node):
+    def reboot_node(self, node, hard=False):
         params = {
             'cmd' : 'dreamhost_ps-reboot',
             'ps' : node.id
