@@ -142,7 +142,7 @@ class RackspaceTests(unittest.TestCase, TestCaseMixin):
         self.assertEquals('9891', ret[1].servers[2])
 
     def test_ex_create_ip_group(self):
-        ret = self.driver.ex_create_ip_group('5467', 'Shared IP Group 1')
+        ret = self.driver.ex_create_ip_group('Shared IP Group 1', '5467')
         self.assertEquals('1234', ret.id)
         self.assertEquals('Shared IP Group 1', ret.name)
         self.assertEquals(1, len(ret.servers))

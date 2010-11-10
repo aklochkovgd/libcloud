@@ -258,12 +258,18 @@ class RackspaceNodeDriver(NodeDriver):
                                        data=ET.tostring(server_elm))
         return self._to_node(resp.object)
 
-    def ex_create_ip_group(self, node_id, group_name):
+    def ex_create_ip_group(self, group_name, node_id=None):
         group_elm = ET.Element(
             'sharedIpGroup',
-            {'name': group_name,
-             'server': node_id}
+            {'xmlns': NAMESPACE,
+             'name': group_name,
+            }
         )
+        if node_id:
+            ET.SubElement(group_elm,
+                'server',
+                {'id': node_id}
+            )
 
         resp = self.connection.request('/shared_ip_groups',
                                        method='POST',
@@ -285,7 +291,8 @@ class RackspaceNodeDriver(NodeDriver):
     def ex_share_ip(self, group_id, node_id, ip, configure_node=True):
         elm = ET.Element(
             'shareIp',
-            {'sharedIpGroupId' : group_id,
+            {'xmlns': NAMESPACE,
+             'sharedIpGroupId' : group_id,
              'configureServer' : str(configure_node)}
         )
 
