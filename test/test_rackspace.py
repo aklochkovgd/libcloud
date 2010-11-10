@@ -16,7 +16,10 @@ import sys
 import unittest
 
 from libcloud.types import InvalidCredsError
-from libcloud.drivers.rackspace import RackspaceNodeDriver as Rackspace
+from libcloud.drivers.rackspace import (
+    RackspaceNodeDriver as Rackspace,
+    SharedIpGroup,
+    NodeIpAddresses)
 from libcloud.base import Node, NodeImage, NodeSize
 
 from test import MockHttp, TestCaseMixin
@@ -103,6 +106,61 @@ class RackspaceTests(unittest.TestCase, TestCaseMixin):
         ret = node.destroy()
         self.assertTrue(ret is True)
 
+    def test_ex_list_ip_addresses(self):
+        ret = self.driver.ex_list_ip_addresses(node_id=72258)
+        self.assertEquals(2, len(ret.public_addresses))
+        self.assertTrue('67.23.10.131' in ret.public_addresses)
+        self.assertTrue('67.23.10.132' in ret.public_addresses)
+        self.assertEquals(1, len(ret.private_addresses))
+        self.assertTrue('10.176.42.16' in ret.private_addresses)
+
+    def test_ex_list_ip_groups(self):
+        ret = self.driver.ex_list_ip_groups()
+        self.assertEquals(2, len(ret))
+        self.assertEquals('1234', ret[0].id)
+        self.assertEquals('Shared IP Group 1', ret[0].name)
+        self.assertEquals('5678', ret[1].id)
+        self.assertEquals('Shared IP Group 2', ret[1].name)
+        self.assertTrue(ret[0].servers is None)
+
+    def test_ex_list_ip_groups_detail(self):
+        ret = self.driver.ex_list_ip_groups(details=True)
+
+        self.assertEquals(2, len(ret))
+
+        self.assertEquals('1234', ret[0].id)
+        self.assertEquals('Shared IP Group 1', ret[0].name)
+        self.assertEquals(2, len(ret[0].servers))
+        self.assertEquals('422', ret[0].servers[0])
+        self.assertEquals('3445', ret[0].servers[1])
+
+        self.assertEquals('5678', ret[1].id)
+        self.assertEquals('Shared IP Group 2', ret[1].name)
+        self.assertEquals(3, len(ret[1].servers))
+        self.assertEquals('23203', ret[1].servers[0])
+        self.assertEquals('2456', ret[1].servers[1])
+        self.assertEquals('9891', ret[1].servers[2])
+
+    def test_ex_create_ip_group(self):
+        ret = self.driver.ex_create_ip_group('5467', 'Shared IP Group 1')
+        self.assertEquals('1234', ret.id)
+        self.assertEquals('Shared IP Group 1', ret.name)
+        self.assertEquals(1, len(ret.servers))
+        self.assertEquals('422', ret.servers[0])
+
+    def test_ex_delete_ip_group(self):
+        ret = self.driver.ex_delete_ip_group('5467')
+        self.assertEquals(True, ret)
+
+    def test_ex_share_ip(self):
+        ret = self.driver.ex_share_ip('1234', '3445', '67.23.21.133')
+        self.assertEquals(True, ret)
+
+    def test_ex_unshare_ip(self):
+        ret = self.driver.ex_unshare_ip('3445', '67.23.21.133')
+        self.assertEquals(True, ret)
+
+
 class RackspaceMockHttp(MockHttp):
 
     fixtures = FileFixtures('rackspace')
@@ -158,6 +216,29 @@ class RackspaceMockHttp(MockHttp):
             raise NotImplemented
         # only used by destroy node()
         return (httplib.ACCEPTED, "", {}, httplib.responses[httplib.ACCEPTED])
+
+    def _v1_0_slug_servers_72258_ips(self, method, url, body, headers):
+        body = self.fixtures.load('v1_slug_servers_ips.xml')
+        return (httplib.OK, body, {}, httplib.responses[httplib.OK])
+
+    def _v1_0_slug_shared_ip_groups_5467(self, method, url, body, headers):
+        if method != 'DELETE':
+            raise NotImplemented
+        return (httplib.NO_CONTENT, "", {}, httplib.responses[httplib.NO_CONTENT])
+
+    def _v1_0_slug_shared_ip_groups(self, method, url, body, headers):
+
+        fixture = 'v1_slug_shared_ip_group.xml' if method == 'POST' else 'v1_slug_shared_ip_groups.xml'
+        body = self.fixtures.load(fixture)
+        return (httplib.OK, body, {}, httplib.responses[httplib.OK])
+
+    def _v1_0_slug_shared_ip_groups_detail(self, method, url, body, headers):
+        body = self.fixtures.load('v1_slug_shared_ip_groups_detail.xml')
+        return (httplib.OK, body, {}, httplib.responses[httplib.OK])
+
+    def _v1_0_slug_servers_3445_ips_public_67_23_21_133(self, method, url, body, headers):
+        return (httplib.ACCEPTED, "", {}, httplib.responses[httplib.ACCEPTED])
+
 
 
 if __name__ == '__main__':

@@ -155,6 +155,27 @@ class RackspaceConnection(ConnectionUserAndKey):
         )
 
 
+class SharedIpGroup(object):
+    """
+    Shared IP group info.
+    """
+    
+    def __init__(self, id, name, servers=None):
+        self.id = str(id)
+        self.name = name
+        self.servers = servers
+
+
+class NodeIpAddresses(object):
+    """
+    List of public and private IP addresses of a Node.
+    """
+
+    def __init__(self, public_addresses, private_addresses):
+        self.public_addresses = public_addresses
+        self.private_addresses = private_addresses
+
+
 class RackspaceNodeDriver(NodeDriver):
     """
     Rackspace node driver.
@@ -236,6 +257,57 @@ class RackspaceNodeDriver(NodeDriver):
                                        method='POST',
                                        data=ET.tostring(server_elm))
         return self._to_node(resp.object)
+
+    def ex_create_ip_group(self, node_id, group_name):
+        group_elm = ET.Element(
+            'sharedIpGroup',
+            {'name': group_name,
+             'server': node_id}
+        )
+
+        resp = self.connection.request('/shared_ip_groups',
+                                       method='POST',
+                                       data=ET.tostring(group_elm))
+        return self._to_shared_ip_group(resp.object)
+
+    def ex_list_ip_groups(self, details=False):
+        uri = '/shared_ip_groups/detail' if details else '/shared_ip_groups' 
+        resp = self.connection.request(uri,
+                                       method='GET')
+        groups = self._findall(resp.object, 'sharedIpGroup')
+        return [self._to_shared_ip_group(el) for el in groups]
+
+    def ex_delete_ip_group(self, group_id):
+        uri = '/shared_ip_groups/%s' % group_id
+        resp = self.connection.request(uri, method='DELETE')
+        return resp.status == 204
+
+    def ex_share_ip(self, group_id, node_id, ip, configure_node=True):
+        elm = ET.Element(
+            'shareIp',
+            {'sharedIpGroupId' : group_id,
+             'configureServer' : str(configure_node)}
+        )
+
+        uri = '/servers/%s/ips/public/%s' % (node_id, ip)
+
+        resp = self.connection.request(uri,
+                                       method='PUT',
+                                       data=ET.tostring(elm))
+        return resp.status == 202
+
+    def ex_unshare_ip(self, node_id, ip):
+        uri = '/servers/%s/ips/public/%s' % (node_id, ip)
+
+        resp = self.connection.request(uri,
+                                       method='DELETE')
+        return resp.status == 202
+
+    def ex_list_ip_addresses(self, node_id):
+        uri = '/servers/%s/ips' % node_id
+        resp = self.connection.request(uri,
+                                       method='GET')
+        return self._to_ip_addresses(resp.object)
 
     def _metadata_to_xml(self, metadata):
         if len(metadata) == 0:
@@ -351,3 +423,19 @@ class RackspaceNodeDriver(NodeDriver):
                      driver=self.connection.driver,
                      extra={'serverId': el.get('serverId')})
         return i
+
+    def _to_shared_ip_group(self, el):
+        servers_el = self._findall(el, 'servers')
+        if servers_el:
+            servers = [s.get('id') for s in self._findall(servers_el[0], 'server')]
+        else:
+            servers = None
+        return SharedIpGroup(id=el.get('id'),
+                     name=el.get('name'),
+                     servers=servers)
+
+    def _to_ip_addresses(self, el):
+        return NodeIpAddresses(
+            [ip.get('addr') for ip in self._findall(self._findall(el, 'public')[0], 'ip')],
+            [ip.get('addr') for ip in self._findall(self._findall(el, 'private')[0], 'ip')]
+        )
