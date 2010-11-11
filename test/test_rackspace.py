@@ -79,7 +79,7 @@ class RackspaceTests(unittest.TestCase, TestCaseMixin):
     def test_create_node(self):
         image = NodeImage(id=11, name='Ubuntu 8.10 (intrepid)', driver=self.driver)
         size = NodeSize(1, '256 slice', None, None, None, None, driver=self.driver)
-        node = self.driver.create_node(name='racktest', image=image, size=size)
+        node = self.driver.create_node(name='racktest', image=image, size=size, shared_ip_group='group1')
         self.assertEqual(node.name, 'racktest')
         self.assertEqual(node.extra.get('password'), 'racktestvJq7d3')
 

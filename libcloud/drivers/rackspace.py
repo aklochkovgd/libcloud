@@ -253,6 +253,10 @@ class RackspaceNodeDriver(NodeDriver):
         if files_elm:
             server_elm.append(files_elm)
 
+        shared_ip_elm = self._shared_ip_group_to_xml(kwargs.get("ex_shared_ip_group", None))
+        if shared_ip_elm:
+            server_elm.append(shared_ip_elm)
+
         resp = self.connection.request("/servers",
                                        method='POST',
                                        data=ET.tostring(server_elm))
@@ -277,7 +281,7 @@ class RackspaceNodeDriver(NodeDriver):
         return self._to_shared_ip_group(resp.object)
 
     def ex_list_ip_groups(self, details=False):
-        uri = '/shared_ip_groups/detail' if details else '/shared_ip_groups' 
+        uri = '/shared_ip_groups/detail' if details else '/shared_ip_groups'
         resp = self.connection.request(uri,
                                        method='GET')
         groups = self._findall(resp.object, 'sharedIpGroup')
@@ -339,6 +343,12 @@ class RackspaceNodeDriver(NodeDriver):
             file_elm.text = base64.b64encode(v)
 
         return personality_elm
+
+    def _shared_ip_group_to_xml(self, shared_ip_group):
+        if not shared_ip_group:
+            return None
+
+        return ET.Element('sharedIpGroupId', shared_ip_group)
 
     def reboot_node(self, node, hard=False):
         if hard:
