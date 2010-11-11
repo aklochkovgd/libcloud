@@ -293,11 +293,16 @@ class RackspaceNodeDriver(NodeDriver):
         return resp.status == 204
 
     def ex_share_ip(self, group_id, node_id, ip, configure_node=True):
+        if configure_node:
+            str_configure = 'true'
+        else:
+            str_configure = 'false'
+
         elm = ET.Element(
             'shareIp',
             {'xmlns': NAMESPACE,
              'sharedIpGroupId' : group_id,
-             'configureServer' : str(configure_node)}
+             'configureServer' : str_configure}
         )
 
         uri = '/servers/%s/ips/public/%s' % (node_id, ip)
