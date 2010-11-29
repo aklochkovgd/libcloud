@@ -466,3 +466,31 @@ class RackspaceNodeDriver(NodeDriver):
             [ip.get('addr') for ip in self._findall(self._findall(el, 'public')[0], 'ip')],
             [ip.get('addr') for ip in self._findall(self._findall(el, 'private')[0], 'ip')]
         )
+
+    def ex_limits(self):
+        """
+        Extra call to get account's limits, such as
+        rates (for example amount of POST requests per day)
+        and absolute limits like total amount of available
+        RAM to be used by servers.
+        
+        @return: C{dict} with keys 'rate' and 'absolute'
+        """
+
+        def _to_rate(el):
+            rate = {}
+            for item in el.items():
+                rate[item[0]] = item[1]
+
+            return rate
+
+        def _to_absolute(el):
+            return {el.get('name'): el.get('value')}
+
+        limits = self.connection.request("/limits").object
+        rate = [ _to_rate(el) for el in self._findall(limits, 'rate/limit') ]
+        absolute = {}
+        for item in self._findall(limits, 'absolute/limit'):
+            absolute.update(_to_absolute(item))
+
+        return {"rate": rate, "absolute": absolute}
