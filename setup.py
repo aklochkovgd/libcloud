@@ -77,7 +77,7 @@ class ApiDocsCommand(Command):
 
 setup(
     name='apache-libcloud',
-    version='0.3.1.2',
+    version='0.3.1.3',
     description='A unified interface into many cloud server providers',
     author='Apache Software Foundation',
     author_email='libcloud@incubator.apache.org',
