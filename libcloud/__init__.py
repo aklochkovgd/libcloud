@@ -21,7 +21,7 @@ libcloud provides a unified interface to the cloud computing resources.
 
 __all__ = ["__version__", "enable_debug"]
 
-__version__ = "0.3.1.2"
+__version__ = "0.3.1.3"
 
 
 def enable_debug(fo):
