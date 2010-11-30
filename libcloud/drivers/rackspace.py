@@ -262,9 +262,16 @@ class RackspaceNodeDriver(NodeDriver):
                                        data=ET.tostring(server_elm))
         return self._to_node(resp.object)
 
-    def ex_rebuild(self, node_id):
+    def ex_rebuild(self, node_id, image_id):
+        elm = ET.Element(
+            'rebuild',
+            {'xmlns': NAMESPACE,
+             'imageId': image_id,
+            }
+        )
         resp = self.connection.request("/servers/%s/action" % node_id,
-                                       method='POST')
+                                       method='POST',
+                                       data=ET.tostring(elm))
         return resp.status == 202
 
     def ex_create_ip_group(self, group_name, node_id=None):
