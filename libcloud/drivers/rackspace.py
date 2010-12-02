@@ -380,6 +380,13 @@ class RackspaceNodeDriver(NodeDriver):
         resp = self.connection.request(uri, method='DELETE')
         return resp.status == 202
 
+    def ex_get_node_details(self, node_id):
+        uri = '/servers/%s' % (node_id)
+        resp = self.connection.request(uri, method='GET')
+        if resp.status == 404:
+            return None
+        return self._to_node(resp.object)
+
     def _node_action(self, node, body):
         if isinstance(body, list):
             attr = ' '.join(['%s="%s"' % (item[0], item[1])
