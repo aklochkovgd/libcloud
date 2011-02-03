@@ -299,6 +299,11 @@ class RackspaceNodeDriver(NodeDriver):
         groups = self._findall(resp.object, 'sharedIpGroup')
         return [self._to_shared_ip_group(el) for el in groups]
 
+    def ex_details_ip_group(self, group_id):
+	uri = '/shared_ip_groups/%s' % group_id
+        resp = self.connection.request(uri, method='GET')
+        return self._to_shared_ip_group(resp.object)	
+
     def ex_delete_ip_group(self, group_id):
         uri = '/shared_ip_groups/%s' % group_id
         resp = self.connection.request(uri, method='DELETE')
