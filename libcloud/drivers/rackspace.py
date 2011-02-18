@@ -237,13 +237,15 @@ class RackspaceNodeDriver(NodeDriver):
         name = kwargs['name']
         image = kwargs['image']
         size = kwargs['size']
-        server_elm = ET.Element(
-            'server',
-            {'xmlns': NAMESPACE,
-             'name': name,
-             'imageId': str(image.id),
-             'flavorId': str(size.id)}
-        )
+        server_attr = [('xmlns', NAMESPACE),
+                       ('name', name),
+                       ('imageId', str(image.id)),
+                       ('flavorId', str(size.id))]
+        shared_ip_elm = kwargs.get("ex_shared_ip_group", None)
+        if shared_ip_elm:
+            server_attr.append(('sharedIpGroupId', shared_ip_elm))
+
+        server_elm = ET.Element('server', dict(server_attr))
 
         metadata_elm = self._metadata_to_xml(kwargs.get("ex_metadata", {}))
         if metadata_elm:
@@ -252,10 +254,6 @@ class RackspaceNodeDriver(NodeDriver):
         files_elm = self._files_to_xml(kwargs.get("ex_files", {}))
         if files_elm:
             server_elm.append(files_elm)
-
-        shared_ip_elm = self._shared_ip_group_to_xml(kwargs.get("ex_shared_ip_group", None))
-        if shared_ip_elm:
-            server_elm.append(shared_ip_elm)
 
         resp = self.connection.request("/servers",
                                        method='POST',
@@ -300,7 +298,7 @@ class RackspaceNodeDriver(NodeDriver):
         return [self._to_shared_ip_group(el) for el in groups]
 
     def ex_details_ip_group(self, group_id):
-	uri = '/shared_ip_groups/%s' % group_id
+        uri = '/shared_ip_groups/%s' % group_id
         resp = self.connection.request(uri, method='GET')
         return self._to_shared_ip_group(resp.object)	
 
