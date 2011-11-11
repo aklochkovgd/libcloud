@@ -17,6 +17,7 @@ import httplib
 import urllib
 import StringIO
 import ssl
+import logging
 
 from pipes import quote as pquote
 
@@ -24,6 +25,10 @@ import libcloud
 
 from libcloud.httplib_ssl import LibcloudHTTPSConnection
 from httplib import HTTPConnection as LibcloudHTTPConnection
+
+
+logger = logging.getLogger(__name__)
+
 
 class Response(object):
     """
@@ -122,10 +127,7 @@ class LoggingConnection():
     """
     Debug class to log all HTTP(s) requests as they could be made
     with the C{curl} command.
-
-    @cvar log: file-like object that logs entries are written to.
     """
-    log = None
 
     def _log_response(self, r):
         rv = "# -------- begin %d:%d response ----------\n" % (id(self), id(r))
@@ -174,7 +176,7 @@ class LoggingConnection():
         if body is not None and len(body) > 0:
             cmd.extend(["--data-binary", pquote(body)])
 
-        cmd.extend([pquote("https://%s:%d%s" % (self.host, self.port, url))])
+        cmd.extend([pquote("https://%s:%s%s" % (self.host, self.port, url))])
         return " ".join(cmd)
 
 class LoggingHTTPSConnection(LoggingConnection, LibcloudHTTPSConnection):
@@ -184,19 +186,17 @@ class LoggingHTTPSConnection(LoggingConnection, LibcloudHTTPSConnection):
 
     def getresponse(self):
         r = LibcloudHTTPSConnection.getresponse(self)
-        if self.log is not None:
+        if logger.isDebugEnabled():
             r, rv = self._log_response(r)
-            self.log.write(rv + "\n")
-            self.log.flush()
+            logger.debug(rv)
         return r
 
     def request(self, method, url, body=None, headers=None):
         headers.update({'X-LC-Request-ID': str(id(self))})
-        if self.log is not None:
+        if logger.isDebugEnabled():
             pre = "# -------- begin %d request ----------\n"  % id(self)
-            self.log.write(pre +
-                           self._log_curl(method, url, body, headers) + "\n")
-            self.log.flush()
+            logger.debug(pre +
+                           self._log_curl(method, url, body, headers))
         return LibcloudHTTPSConnection.request(self, method, url, body, headers)
 
 class LoggingHTTPConnection(LoggingConnection, LibcloudHTTPConnection):
@@ -206,19 +206,17 @@ class LoggingHTTPConnection(LoggingConnection, LibcloudHTTPConnection):
 
     def getresponse(self):
         r = LibcloudHTTPConnection.getresponse(self)
-        if self.log is not None:
+        if logger.isDebugEnabled():
             r, rv = self._log_response(r)
-            self.log.write(rv + "\n")
-            self.log.flush()
+            logger.debug(rv)
         return r
 
     def request(self, method, url, body=None, headers=None):
         headers.update({'X-LC-Request-ID': str(id(self))})
-        if self.log is not None:
+        if logger.isDebugEnabled():
             pre = "# -------- begin %d request ----------\n"  % id(self)
-            self.log.write(pre +
-                           self._log_curl(method, url, body, headers) + "\n")
-            self.log.flush()
+            logger.debug(pre +
+                           self._log_curl(method, url, body, headers))
         return LibcloudHTTPConnection.request(self, method, url,
                                                body, headers)
 
@@ -226,8 +224,7 @@ class ConnectionKey(object):
     """
     A Base Connection class to derive from.
     """
-    #conn_classes = (LoggingHTTPSConnection)
-    conn_classes = (LibcloudHTTPConnection, LibcloudHTTPSConnection)
+    conn_classes = (LoggingHTTPConnection, LoggingHTTPSConnection)
 
     responseCls = Response
     rawResponseCls = RawResponse
